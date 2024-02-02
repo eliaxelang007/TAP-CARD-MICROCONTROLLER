@@ -4,6 +4,7 @@
 #include "buzzer.h"
 #include "lcd.h"
 #include "rfid.h"
+#include "section.h"
 
 constexpr uint8_t SECOND_MILLISECONDS = 1000;
 
@@ -15,54 +16,58 @@ Buzzer buzzer{13};
 
 void setup()
 {
-    println("Hello, world!");
+  println("Hello, world!");
 
-    //api.initialize("ANIMO", "2401Taft");
-    //api.initialize("Cedric", "cedric1278");
+  // api.initialize("ANIMO", "2401Taft");
+  // api.initialize("Cedric", "cedric1278");
 
-    // Wifi: PLDTHOMEFIBR1cd30; Password: PLDTWIFIDQ3f4
+  // Wifi: PLDTHOMEFIBR1cd30; Password: PLDTWIFIDQ3f4
 
-    String ssid = readln("What's the wifi's ssid?");
-    String password = readln("What's the wifi's password?");
-    
-    api.initialize(ssid, password);
-    
-    scanner.initialize();
-    display.initialize();
-    display.print("Welcome to");
-    display.set_cursor(0, 1);
-    display.print("AniTAP!");
+  String ssid = readln("What's the wifi's ssid?");
+  String password = readln("What's the wifi's password?");
+  String section
+
+      api.initialize(ssid, password);
+
+  scanner.initialize();
+  display.initialize();
+  display.print("Welcome to");
+  display.set_cursor(0, 1);
+  display.print("AniTAP!");
 }
 
 int cards_detected = 0;
 
 void loop()
 {
-    buzzer.update(CARD_DETECTED);
+  buzzer.update(CARD_DETECTED);
 
-    scanner.update(
-        [](Card card)
+  scanner.update(
+      [](Card card)
+      {
+        display.clear();
+        buzzer.reset();
+
+        display.print("Loading...");
+        display.show();
+
+        const ServerResponse response = api.send_tap(card.uid, 100 * SECOND_MILLISECONDS);
+
+        display.clear();
+
+        if (response.status != HTTP_CODE_OK)
         {
-            display.clear();
-            buzzer.reset();
+          display.print("Error...");
+        }
+        else
+        {
+          display.print("Name");
+          display.set_cursor(0, 1);
+          display.print(response.response);
+        }
+      });
 
-            display.print("Loading...");
-            display.show();
-            
-            const ServerResponse response = api.send_tap(card.uid, 100 * SECOND_MILLISECONDS);
-
-            display.clear();
-
-            if (response.status != HTTP_CODE_OK) {
-              display.print("Error...");
-            } else {
-              display.print("Name");
-              display.set_cursor(0, 1);
-              display.print(response.response);
-            } 
-        });
-
-    display.show();
+  display.show();
 }
 
 // using Status = MFRC522::StatusCode;

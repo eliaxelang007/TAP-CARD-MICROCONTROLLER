@@ -6,6 +6,7 @@
 
 #include "serial_io.h"
 #include "uid.h"
+#include "section.h"
 
 struct ServerResponse
 {
@@ -32,13 +33,13 @@ public:
         debugln("Connected!");
     }
 
-    ServerResponse send_tap(Uid uid, uint32_t timeout_ms)
+    ServerResponse send_tap(Section section, Uid uid, uint32_t timeout_ms)
     {
         HTTPClient client;
 
         debugln("Connected to server.");
 
-        String request = server_address + "/log/" + uid.to_string();
+        String request = server_address + "/log/" + section_to_char(section) + '/' + uid.to_string();
 
         client.begin(request);
 
