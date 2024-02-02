@@ -33,14 +33,14 @@ public:
         if (column >= columns || row >= rows)
             return 0;
 
-        current_buffer[row][column] = character;
+        current_buffer[row][column++] = character;
 
-        column = (column + 1) % columns;
+        // column = (column + 1) % columns;
 
-        if (column == 0)
-        {
-            row += 1;
-        }
+        // if (column == 0)
+        // {
+        //     row += 1;
+        // }
 
         return 1;
     }
@@ -61,10 +61,12 @@ public:
 
     void show()
     {
-        bool was_same = false;
-
         for (int i = 0; i < rows; i++)
         {
+            lcd.setCursor(0, i);
+
+            bool was_same = false;
+
             for (int j = 0; j < columns; j++)
             {
                 char current_character = current_buffer[i][j];
