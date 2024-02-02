@@ -78,43 +78,9 @@ void loop()
           display.print((char)section_to_char(section));
           display.print(" != ");
           display.print("10");
-          display.print((char)response.response);
+          display.print(response.response);
         }
       });
 
   display.show();
 }
-
-// using Status = MFRC522::StatusCode;
-
-// ReadResult read_block(uint8_t block_index)
-// {
-//     Status authentication_status = authenticate_block(rfid, key, block_index);
-
-//     if (authentication_status != MFRC522::STATUS_OK)
-//     {
-//         return ReadResult::err(authentication_status);
-//     }
-
-//     constexpr uint8_t CRC_BYTES = 2;
-//     constexpr uint8_t BYTES_TO_READ = BLOCK_SIZE + CRC_BYTES;
-
-//     uint8_t buffer[BYTES_TO_READ] = {0};
-//     uint8_t written_bytes = BYTES_TO_READ;
-
-//     Status read_status = rfid.MIFARE_Read(block_index, buffer, &written_bytes);
-
-//     if (read_status != MFRC522::STATUS_OK)
-//     {
-//         return ReadResult::err(read_status);
-//     }
-
-//     Block block = {0};
-
-//     for (int i = 0; i < BLOCK_SIZE; i++)
-//     {
-//         block.bytes[i] = buffer[i];
-//     }
-
-//     return ReadResult::ok(block);
-// }
