@@ -33,7 +33,14 @@ public:
         if (column >= columns || row >= rows)
             return 0;
 
-        current_buffer[row][column++] = character;
+        current_buffer[row][column] = character;
+
+        column = (column + 1) % columns;
+
+        if (column == 0)
+        {
+            row += 1;
+        }
 
         return 1;
     }
