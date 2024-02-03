@@ -35,15 +35,14 @@ void setup()
   display.set_cursor(0, 1);
   display.print("AniTAP!");
   display.show();
-  display.clear();
 
   // api.initialize("ANIMO", "2401Taft");
   // api.initialize("Cedric", "cedric1278");
 
   // Wifi: PLDTHOMEFIBR1cd30; Password: PLDTWIFIDQ3f4
 
-  String ssid = "vivo 1920";    // readln("What's the wifi's ssid?");
-  String password = "11261997"; // readln("What's the wifi's password?");
+  String ssid = "Cedric";    // readln("What's the wifi's ssid?");
+  String password = "cedric1278"; // readln("What's the wifi's password?");
 
   section = char_to_section('a' /* readln("What's this terminal's section")[0] */);
 
