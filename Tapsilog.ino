@@ -42,10 +42,10 @@ void setup()
 
   // Wifi: PLDTHOMEFIBR1cd30; Password: PLDTWIFIDQ3f4
 
-  String ssid = readln("What's the wifi's ssid?");
-  String password = readln("What's the wifi's password?");
+  String ssid = "vivo 1920";    // readln("What's the wifi's ssid?");
+  String password = "11261997"; // readln("What's the wifi's password?");
 
-  section = char_to_section(readln("What's this terminal's section")[0]);
+  section = char_to_section('a' /* readln("What's this terminal's section")[0] */);
 
   api.initialize(ssid, password);
 }
