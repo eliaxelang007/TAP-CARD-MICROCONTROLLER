@@ -47,7 +47,7 @@ public:
 
         int http_status = client.GET();
 
-        if (http_status != HTTP_CODE_OK)
+        if (http_status < 200 || http_status >= 300)
         {
             debug("Status: ");
             debugln(HTTPClient::errorToString(http_status));

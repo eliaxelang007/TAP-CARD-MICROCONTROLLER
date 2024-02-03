@@ -26,12 +26,16 @@ void setup()
   pinMode(red, OUTPUT);
   pinMode(green, OUTPUT);
 
+  success_led();
+
   scanner.initialize();
   display.initialize();
 
   display.print("Welcome to");
   display.set_cursor(0, 1);
   display.print("AniTAP!");
+  display.show();
+  display.clear();
 
   // api.initialize("ANIMO", "2401Taft");
   // api.initialize("Cedric", "cedric1278");
@@ -99,11 +103,11 @@ void loop()
 
           display.print("10");
 
-          String section = "";
+          String section_str = "";
 
-          section.concat((char)section_to_char(section));
+          section_str.concat((char)section_to_char(section));
 
-          display.print(section);
+          display.print(section_str);
 
           display.print(" Terminal:");
 
