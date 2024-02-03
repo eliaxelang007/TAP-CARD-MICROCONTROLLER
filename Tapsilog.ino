@@ -16,9 +16,15 @@ Buzzer buzzer{13};
 
 Section section = Section::A;
 
+const uint8_t red = 34;
+const uint8_t green = 35;
+
 void setup()
 {
   println("Hello, world!");
+
+  pinMode(red, OUTPUT);
+  pinMode(green, OUTPUT);
 
   scanner.initialize();
   display.initialize();
@@ -26,7 +32,7 @@ void setup()
   display.print("Welcome to");
   display.set_cursor(0, 1);
   display.print("AniTAP!");
-  
+
   // api.initialize("ANIMO", "2401Taft");
   // api.initialize("Cedric", "cedric1278");
 
@@ -34,13 +40,24 @@ void setup()
 
   String ssid = readln("What's the wifi's ssid?");
   String password = readln("What's the wifi's password?");
-  
+
   section = char_to_section(readln("What's this terminal's section")[0]);
 
   api.initialize(ssid, password);
 }
 
 int cards_detected = 0;
+
+void fail_led()
+{
+  digitalWrite(red, HIGH);
+  digitalWrite(green, LOW);
+}
+void success_led()
+{
+  digitalWrite(red, LOW);
+  digitalWrite(green, HIGH);
+}
 
 void loop()
 {
@@ -61,23 +78,38 @@ void loop()
 
         if (response.status < 200 || response.status >= 300)
         {
+          fail_led();
           display.print("Error...");
           return;
         }
 
-        if (response.status == 200) {
+        success_led();
+
+        if (response.status == 200)
+        {
+          success_led();
+
           display.print("Name:");
           display.set_cursor(0, 1);
           display.print(response.response);
         }
+        else if (response.status == 201)
+        {
+          fail_led();
 
-        if (response.status == 201) {
-          display.print("Invalid section:");
+          display.print("10");
+
+          String section = "";
+
+          section.concat((char)section_to_char(section));
+
+          display.print(section);
+
+          display.print(" Terminal:");
+
           display.set_cursor(0, 1);
-          display.print("10");
-          display.print((char)section_to_char(section));
-          display.print(" != ");
-          display.print("10");
+
+          display.print("Found 10");
           display.print(response.response);
         }
       });
