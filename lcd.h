@@ -1,6 +1,8 @@
 #ifndef _LCD
 #define _LCD
 
+#include <array>
+
 #include <Print.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -10,16 +12,17 @@ template <size_t rows, size_t columns>
 class Display : public Print
 {
 public:
-    Display(uint8_t i2c_address = 0x27) : lcd{i2c_address, columns, rows}
+    Display(uint8_t i2c_address = 0x27) : lcd{i2c_address, columns, rows},
+                                          current_buffer{' '},
+                                          previous_buffer{' '},
+                                          row{0},
+                                          column{0}
     {
-        for (size_t i = 0; i < rows; i++)
+        for (int i = 0; i < rows; i++)
         {
             current_buffer[i][columns] = '\0';
             previous_buffer[i][columns] = '\0';
         }
-
-        clear();
-        clear(previous_buffer);
     }
 
     void initialize()
@@ -34,13 +37,6 @@ public:
             return 0;
 
         current_buffer[row][column++] = character;
-
-        // column = (column + 1) % columns;
-
-        // if (column == 0)
-        // {
-        //     row += 1;
-        // }
 
         return 1;
     }
@@ -63,8 +59,6 @@ public:
     {
         for (int i = 0; i < rows; i++)
         {
-            lcd.setCursor(0, i);
-
             bool was_same = false;
 
             for (int j = 0; j < columns; j++)
@@ -74,7 +68,7 @@ public:
 
                 const bool same = current_character == previous_character;
 
-                if (same != was_same)
+                if (same != was_same || (!was_same && !same))
                 {
                     was_same = same;
 
@@ -94,11 +88,11 @@ public:
     }
 
 private:
-    char current_buffer[rows][columns + 1] = {0};
-    char previous_buffer[rows][columns + 1] = {0};
+    char current_buffer[rows][columns + 1];
+    char previous_buffer[rows][columns + 1];
 
-    uint8_t row = 0;
-    uint8_t column = 0;
+    uint8_t row;
+    uint8_t column;
 
     LiquidCrystal_I2C lcd;
 
