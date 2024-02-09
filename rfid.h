@@ -65,9 +65,9 @@ private:
 
 struct Block
 {
-    static constexpr uint8_t BLOCK_SIZE = 16;
+    static constexpr uint8_t BLOCK_BYTE_COUNT = 16;
 
-    std::array<uint8_t, BLOCK_SIZE> bytes;
+    std::array<uint8_t, BLOCK_BYTE_COUNT> bytes;
 };
 
 class RfidScanner
@@ -76,7 +76,7 @@ public:
     class Card
     {
     public:
-        static constexpr uint8_t BLOCK_SIZE = Block::BLOCK_SIZE;
+        static constexpr uint8_t BLOCK_BYTE_COUNT = Block::BLOCK_BYTE_COUNT;
 
         Uid uid()
         {
@@ -96,7 +96,7 @@ public:
             }
 
             constexpr uint8_t CRC_BYTES = 2;
-            constexpr uint8_t BYTES_TO_READ = BLOCK_SIZE + CRC_BYTES;
+            constexpr uint8_t BYTES_TO_READ = BLOCK_BYTE_COUNT + CRC_BYTES;
 
             std::array<uint8_t, BYTES_TO_READ> buffer = {0};
 
@@ -110,7 +110,7 @@ public:
 
             Block block = {0};
 
-            std::copy_n(buffer.begin(), BLOCK_SIZE, block.bytes.begin());
+            std::copy_n(buffer.begin(), BLOCK_BYTE_COUNT, block.bytes.begin());
 
             return ReadResult::ok(block);
         }
@@ -131,7 +131,7 @@ public:
             const Status write_status = _scanner.mfrc522.MIFARE_Write(
                 block_index.index(),
                 block_data.bytes.data(),
-                BLOCK_SIZE);
+                BLOCK_BYTE_COUNT);
 
             if (write_status != MFRC522::STATUS_OK)
             {

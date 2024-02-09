@@ -75,7 +75,7 @@ void add_to_buffer(String &buffer, const T &text, const Args &...texts)
 template <typename T, typename... Args>
 String build_string(const T &text, const Args &...texts)
 {
-    size_t length = total_chars_length(text, texts...);
+    const size_t length = total_chars_length(text, texts...);
 
     String buffer;
     buffer.reserve(length);
