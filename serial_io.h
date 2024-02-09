@@ -3,12 +3,18 @@
 
 #define DEBUG_MODE
 
-static bool began = false;
+void begin()
+{
+    static bool began = false;
 
-void begin() {
-  if (began) return;
-  Serial.begin(9600);
-  began = true;
+    if (began)
+    {
+        return;
+    }
+
+    Serial.begin(9600);
+
+    began = true;
 }
 
 template <typename P>
@@ -41,14 +47,16 @@ void debugln(P printable)
 #endif
 }
 
-String readln(String message) {
-  println(message);
+String readln(String message)
+{
+    println(message);
 
-  while (!Serial.available()) {
-    continue;
-  }
+    while (!Serial.available())
+    {
+        continue;
+    }
 
-  return Serial.readStringUntil('\n');
+    return Serial.readStringUntil('\n');
 }
 
 #endif

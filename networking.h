@@ -3,21 +3,21 @@
 
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <algorithm>
 
 #include "serial_io.h"
-#include "uid.h"
 #include "section.h"
-
-struct ServerResponse
-{
-    int status;
-    String response;
-};
+#include "strings.h"
+#include "uid.h"
 
 class ServerApi
 {
 public:
-    ServerApi(const String server_address) : server_address{server_address} {}
+    static constexpr char SERVER_ADDRESS[] = "https://tap-card-server-production.up.railway.app";
+
+    using ServerResponse = Result<String, int>;
+
+    explicit ServerApi() {}
 
     void initialize(String ssid, String password, size_t channel = 0)
     {
@@ -39,7 +39,12 @@ public:
 
         debugln("Connected to server.");
 
-        String request = server_address + "/log/" + section_to_char(section) + '/' + uid.to_string();
+        String request = build_string(
+            SERVER_ADDRESS,
+            "/log/",
+            section.to_char(),
+            '/',
+            uid.to_chars());
 
         client.begin(request);
 
@@ -52,25 +57,18 @@ public:
             debug("Status: ");
             debugln(HTTPClient::errorToString(http_status));
 
-            return ServerResponse{
-                .status = http_status,
-                .response = ""};
+            return ServerResponse::err(http_status);
         }
 
-        String response = client.getString();
+        const String response = client.getString();
 
         debug("Received: ");
         debugln(response);
 
         client.end();
 
-        return ServerResponse{
-            .status = http_status,
-            .response = response};
+        return ServerResponse::ok(response);
     }
-
-private:
-    const String server_address;
 };
 
 #endif

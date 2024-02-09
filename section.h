@@ -1,43 +1,69 @@
 #ifndef _SECTION
 #define _SECTION
 
-enum class Section : uint8_t
+#include <cctype>
+
+#include "variant.h"
+
+// https://stackoverflow.com/questions/21295935/can-a-c-enum-class-have-methods
+class Section
 {
-    A,
-    B,
-    C
-};
-
-Section char_to_section(char character) {
-    using S = Section;
-
-    switch (character) {
-    case 'a':
-      return Section::A;
-
-    case 'b':
-      return Section::B;
-
-    case 'c':
-       return Section::C;
-    }
-
-    return Section::A;
-}
-
-char section_to_char(Section section)
-{
-    using S = Section;
-
-    switch (section)
+public:
+    enum SectionValue
     {
-    case S::A:
-        return 'a';
-    case S::B:
-        return 'b';
-    case S::C:
-        return 'c';
+        A,
+        B,
+        C
+    };
+
+    Section() = default;
+    Section(SectionValue section) : _section{section} {}
+
+    operator SectionValue() const { return _section; }
+    explicit operator bool() const = delete;
+
+    bool operator==(Section other) const { return _section == other._section; }
+    bool operator!=(Section other) const { return _section != other._section; }
+
+    using OptionSection = Option<Section>;
+
+    static OptionSection to_section(char character)
+    {
+        using O = OptionSection;
+        using S = Section;
+
+        switch (tolower(character))
+        {
+        case 'a':
+            return O::ok(S::A);
+
+        case 'b':
+            return O::ok(S::B);
+
+        case 'c':
+            return O::ok(S::C);
+        }
+
+        return O::err(None{});
     }
-}
+
+    char to_char()
+    {
+        using S = Section;
+
+        switch (_section)
+        {
+        case S::A:
+            return 'a';
+        case S::B:
+            return 'b';
+        case S::C:
+            return 'c';
+        }
+    }
+
+private:
+    SectionValue _section;
+};
 
 #endif

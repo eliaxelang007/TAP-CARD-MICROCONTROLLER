@@ -12,8 +12,8 @@ public:
     {
         Result result{};
 
-        result.tag = Tag::Ok;
-        result.value.ok = ok;
+        result._tag = Tag::Ok;
+        result._value.ok = ok;
 
         return result;
     }
@@ -22,28 +22,28 @@ public:
     {
         Result result{};
 
-        result.tag = Tag::Ok;
-        result.value.ok = std::move(ok);
+        result._tag = Tag::Ok;
+        result._value.ok = std::move(ok);
 
         return result;
     }
 
-    static Result err(const E &err)
+    static Result err(const E &error)
     {
         Result result{};
 
-        result.tag = Tag::Err;
-        result.value.err = err;
+        result._tag = Tag::Err;
+        result._value.error = error;
 
         return result;
     }
 
-    static Result err(E &&err)
+    static Result err(E &&error)
     {
         Result result{};
 
-        result.tag = Tag::Err;
-        result.value.err = std::move(err);
+        result._tag = Tag::Err;
+        result._value.error = std::move(error);
 
         return result;
     }
@@ -51,46 +51,61 @@ public:
     template <typename M>
     M match(
         std::function<M(T)> on_ok,
-        std::function<M(E)> on_err) &&
+        std::function<M(E)> on_error) &&
     {
-        switch (tag)
+        switch (_tag)
         {
         case Tag::Ok:
-            return on_ok(std::move(value.ok));
+            return on_ok(std::move(_value.ok));
         case Tag::Err:
-            return on_err(std::move(value.err));
+            return on_error(std::move(_value.error));
         }
     }
 
-    Result(const Result &other) : tag{other.tag}
+    template <typename M>
+    Result<M, E> map(
+        std::function<M(T)> map) &&
     {
-        switch (tag)
+        using R = Result<M, E>;
+
+        switch (_tag)
+        {
+        case Tag::Ok:
+            return R::ok(map(std::move(_value.ok)));
+        case Tag::Err:
+            return R::err(std::move(_value.error));
+        }
+    }
+
+    Result(const Result &other) : _tag{other._tag}
+    {
+        switch (_tag)
         {
         case Tag::Ok:
         {
-            value.ok = other.value.ok;
+            _value.ok = other._value.ok;
             break;
         }
         case Tag::Err:
         {
-            value.err = other.value.err;
+            _value.error = other._value.error;
             break;
         }
         }
     }
 
-    Result(Result &&other) noexcept : tag{other.tag}
+    Result(Result &&other) noexcept : _tag{other._tag}
     {
-        switch (tag)
+        switch (_tag)
         {
         case Tag::Ok:
         {
-            value.ok = std::move(other.value.ok);
+            _value.ok = std::move(other._value.ok);
             break;
         }
         case Tag::Err:
         {
-            value.err = std::move(other.value.err);
+            _value.error = std::move(other._value.error);
             break;
         }
         }
@@ -106,18 +121,18 @@ public:
         if (this == &other)
             return *this;
 
-        tag = other.tag;
+        _tag = other._tag;
 
-        switch (tag)
+        switch (_tag)
         {
         case Tag::Ok:
         {
-            value.ok = std::move(other.value.ok);
+            _value.ok = std::move(other._value.ok);
             break;
         }
         case Tag::Err:
         {
-            value.err = std::move(other.value.err);
+            _value.error = std::move(other._value.error);
             break;
         }
         }
@@ -127,16 +142,16 @@ public:
 
     ~Result()
     {
-        switch (tag)
+        switch (_tag)
         {
         case Tag::Ok:
         {
-            value.ok.~T();
+            _value.ok.~T();
             break;
         }
         case Tag::Err:
         {
-            value.err.~E();
+            _value.error.~E();
             break;
         }
         }
@@ -147,11 +162,11 @@ private:
     {
         Ok,
         Err
-    } tag;
+    } _tag;
     union Variant
     {
         T ok;
-        E err;
+        E error;
 
         explicit Variant() {}
 
@@ -161,9 +176,16 @@ private:
         Variant &operator=(Variant &&other) noexcept = delete;
 
         ~Variant() {}
-    } value;
+    } _value;
 
     explicit Result() {}
 };
+
+struct None
+{
+};
+
+template <typename T>
+using Option = Result<T, None>;
 
 #endif

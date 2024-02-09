@@ -2,41 +2,37 @@
 #define _LCD
 
 #include <array>
+#include <algorithm>
 
 #include <Print.h>
 #include <LiquidCrystal_I2C.h>
-
-#include "serial_io.h"
 
 template <size_t rows, size_t columns>
 class Display : public Print
 {
 public:
-    Display(uint8_t i2c_address = 0x27) : lcd{i2c_address, columns, rows},
-                                          current_buffer{' '},
-                                          previous_buffer{' '},
-                                          row{0},
-                                          column{0}
+    Display(uint8_t i2c_address = 0x27) : _lcd{i2c_address, columns, rows},
+                                          _current_buffer{},
+                                          _previous_buffer{},
+                                          _row{0},
+                                          _column{0}
     {
-        for (int i = 0; i < rows; i++)
-        {
-            current_buffer[i][columns] = '\0';
-            previous_buffer[i][columns] = '\0';
-        }
+        _clear(_current_buffer);
+        _clear(_previous_buffer);
     }
 
     void initialize()
     {
-        lcd.init();
-        lcd.backlight();
+        _lcd.init();
+        _lcd.backlight();
     }
 
     size_t write(uint8_t character) override
     {
-        if (column >= columns || row >= rows)
+        if (_column >= columns || _row >= rows)
             return 0;
 
-        current_buffer[row][column++] = character;
+        _current_buffer[_row][_column++] = character;
 
         return 1;
     }
@@ -44,15 +40,15 @@ public:
     void clear()
     {
         set_cursor(0, 0);
-        lcd.setCursor(0, 0);
+        _lcd.setCursor(0, 0);
 
-        clear(current_buffer);
+        _clear(_current_buffer);
     }
 
     void set_cursor(uint8_t new_column, uint8_t new_row)
     {
-        row = new_row;
-        column = new_column;
+        _row = new_row;
+        _column = new_column;
     }
 
     void show()
@@ -63,8 +59,8 @@ public:
 
             for (int j = 0; j < columns; j++)
             {
-                char current_character = current_buffer[i][j];
-                char &previous_character = previous_buffer[i][j];
+                const char current_character = _current_buffer[i][j];
+                char &previous_character = _previous_buffer[i][j];
 
                 const bool same = current_character == previous_character;
 
@@ -74,37 +70,36 @@ public:
 
                     if (!same)
                     {
-                        lcd.setCursor(j, i);
+                        _lcd.setCursor(j, i);
                     }
                 }
 
                 if (same)
+                {
                     continue;
+                }
 
-                lcd.print(current_character);
+                _lcd.print(current_character);
                 previous_character = current_character;
             }
         }
     }
 
 private:
-    char current_buffer[rows][columns + 1];
-    char previous_buffer[rows][columns + 1];
+    std::array<std::array<char, columns>, rows> _current_buffer;
+    std::array<std::array<char, columns>, rows> _previous_buffer;
 
-    uint8_t row;
-    uint8_t column;
+    uint8_t _row;
+    uint8_t _column;
 
-    LiquidCrystal_I2C lcd;
+    LiquidCrystal_I2C _lcd;
 
-    void clear(char (&buffer)[rows][columns + 1])
+    void _clear(std::array<std::array<char, columns>, rows> &buffer)
     {
-        for (size_t i = 0; i < rows; i++)
-        {
-            for (size_t j = 0; j < columns; j++)
-            {
-                buffer[i][j] = ' ';
-            }
-        }
+        // https://www.reddit.com/r/cpp_questions/comments/p3ntua/how_to_properly_use_stdarrayfill_method_to/
+        // https://godbolt.org/z/eTYhsv85h
+        buffer[0].fill({' '});
+        buffer.fill(buffer[0]);
     }
 };
 
