@@ -6,7 +6,7 @@
 
 #include "slice.h"
 
-using StringPart = Slice<const char>;
+using str = Slice<const char>;
 
 constexpr size_t strings_length() noexcept
 {
@@ -14,7 +14,7 @@ constexpr size_t strings_length() noexcept
 }
 
 template <typename... Args>
-constexpr size_t strings_length(StringPart part, Args... texts) noexcept
+constexpr size_t strings_length(str part, Args... texts) noexcept
 {
     return part.length() + strings_length(texts...);
 }
@@ -22,7 +22,7 @@ constexpr size_t strings_length(StringPart part, Args... texts) noexcept
 template <typename... Args>
 constexpr size_t strings_length(const Args &...texts) noexcept
 {
-    return strings_length(StringPart{texts}...);
+    return strings_length(str{texts}...);
 }
 
 constexpr void add_to_buffer(String &buffer) noexcept
@@ -31,7 +31,7 @@ constexpr void add_to_buffer(String &buffer) noexcept
 }
 
 template <typename... Args>
-constexpr void add_to_buffer(String &buffer, StringPart part, Args... parts) noexcept
+constexpr void add_to_buffer(String &buffer, str part, Args... parts) noexcept
 {
     buffer.concat(part.begin(), part.length());
     add_to_buffer(buffer, parts...);
@@ -40,11 +40,11 @@ constexpr void add_to_buffer(String &buffer, StringPart part, Args... parts) noe
 template <typename... Args>
 constexpr void add_to_buffer(String &buffer, const Args &...texts) noexcept
 {
-    add_to_buffer(buffer, StringPart{texts}...);
+    add_to_buffer(buffer, str{texts}...);
 }
 
 template <typename... Args>
-String build_string(StringPart part, Args... texts) noexcept
+String build_string(str part, Args... texts) noexcept
 {
     const size_t length = strings_length(part, texts...);
 
@@ -59,7 +59,7 @@ String build_string(StringPart part, Args... texts) noexcept
 template <typename... Args>
 String build_string(const Args &...texts) noexcept
 {
-    return build_string(StringPart{texts}...);
+    return build_string(str{texts}...);
 }
 
 #endif

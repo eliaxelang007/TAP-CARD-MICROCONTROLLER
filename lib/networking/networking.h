@@ -1,3 +1,6 @@
+#ifndef _NETWORKING
+#define _NETWORKING
+
 // https://esp32.com/viewtopic.php?t=28570
 // https://github.com/espressif/esp-idf/blob/master/examples/protocols/http_request/main/http_request_example_main.c
 
@@ -7,86 +10,129 @@
 #include <esp_http_client.h>
 #include <esp_transport_ssl.h>
 
-#include <vector>
+#include <memory>
 
 #include "server_certificate.h"
 #include "slice.h"
+#include "string_help.h"
 #include "serial_io.h"
+
+#include "result.h"
+#include "method.h"
+
+struct HttpResponse
+{
+    Option<std::vector<uint8_t>> data;
+};
 
 class HttpClient
 {
-    HttpClient() : _client { esp_http_client_init() }
-
-    ~HttpClient()
+    class HttpWorker
     {
-        esp_http_client_set_url
-            esp_http_client_cleanup(_client);
-    }
+    private:
+        using ByteBuffer = std::vector<uint8_t>;
 
-private:
-    using ByteBuffer = std::vector<uint8_t>;
-    esp_http_client_handle_t _client;
-
-    static esp_err_t _event_handler(esp_http_client_event_t *evt) noexcept
-    {
-        static bool new_request = true;
-
-        ByteBuffer &output_buffer = *static_cast<ByteBuffer *>(evt->user_data);
-
-        switch (evt->event_id)
+        static esp_err_t _event_handler(esp_http_client_event_t *evt) noexcept
         {
-        case HTTP_EVENT_ON_DATA:
-        {
-            if (esp_http_client_is_chunked_response(evt->client))
+            static bool new_request = true;
+
+            ByteBuffer &output_buffer = *static_cast<ByteBuffer *>(evt->user_data);
+
+            switch (evt->event_id)
             {
+            case HTTP_EVENT_ON_DATA:
+            {
+                if (esp_http_client_is_chunked_response(evt->client))
+                {
+                    break;
+                }
+
+                if (new_request)
+                {
+                    output_buffer.clear();
+                    new_request = false;
+                }
+
+                const Slice<uint8_t> data = Slice<uint8_t>(*static_cast<uint8_t *>(evt->data), evt->data_len);
+
+                output_buffer.insert(output_buffer.end(), data.begin(), data.end());
+
                 break;
             }
 
-            if (new_request)
+            case HTTP_EVENT_ON_FINISH:
             {
-                output_buffer.clear();
-                new_request = false;
+                new_request = true;
+                break;
             }
 
-            const Slice<uint8_t> data = Slice<uint8_t>(*static_cast<uint8_t *>(evt->data), evt->data_len);
+            default:
+            {
+                break;
+            }
+            }
 
-            output_buffer.insert(output_buffer.end(), data.begin(), data.end());
-
-            break;
+            return ESP_OK;
         }
 
-        case HTTP_EVENT_ON_FINISH:
+        static constexpr esp_http_client_config_t _DEFAULT_CONFIG = {.url = "",
+                                                                     .cert_pem = "",
+                                                                     .cert_len = sizeof(""),
+                                                                     .timeout_ms = 5000,
+                                                                     .event_handler = HttpWorker::_event_handler,
+                                                                     .user_data = nullptr,
+                                                                     .is_async = true};
+
+    public:
+        HttpWorker() : _client{std::shared_ptr<esp_http_client>(esp_http_client_init(&_DEFAULT_CONFIG), esp_http_client_cleanup)}
         {
-            new_request = true;
-            break;
         }
 
-        default:
-        {
-            break;
-        }
-        }
+    private:
+        std::shared_ptr<esp_http_client> _client;
+    };
 
-        return ESP_OK;
+    using SharedWorker = std::shared_ptr<HttpWorker>;
+
+public:
+    explicit HttpClient() : _worker{std::make_shared<HttpWorker>()} {}
+
+    class Request
+    {
+    private:
+        friend class HttpClient;
+
+        explicit Request(
+            SharedWorker worker,
+            HttpMethod method,
+            str url,
+            str certificate,
+            uint16_t timeout) : _worker{worker}, _method{method}, _url{url}, _certificate{certificate}, _timeout{timeout} {}
+
+        SharedWorker _worker;
+        HttpMethod _method;
+        str _url;
+        str _certificate;
+        uint16_t _timeout;
+    };
+
+    Request request(HttpMethod method, str url, str certificate, uint16_t timeout = 5000)
+    {
+        return Request{
+            _worker,
+            method,
+            url,
+            certificate,
+            timeout,
+        };
     }
-}
 
-void
-https_async()
+private:
+    SharedWorker _worker;
+};
+
+void https_async()
 {
-    ByteBuffer output_buffer{};
-
-    esp_http_client_config_t config = {
-        .url = "https://tap-card-server-production.up.railway.app", // "https://postman-echo.com/post", //"https://example.com", // "https://tap-card-server-production.up.railway.app",
-        .cert_pem = SERVER_CERTIFICATE,
-        .cert_len = sizeof(SERVER_CERTIFICATE),
-        // .cert_pem = SERVER_CERTIFICATE,
-        // .cert_len = sizeof(SERVER_CERTIFICATE),
-        .timeout_ms = 5000,
-        .event_handler = _event_handler,
-        .user_data = &output_buffer,
-        .is_async = true};
-
     esp_http_client_handle_t client = esp_http_client_init(&config);
     // const char *post_data = "Using a Palantír requires a person with great strength of will and wisdom. The Palantíri were meant to "
     //                         "be used by the Dúnedain to communicate throughout the Realms in Exile. During the War of the Ring, "
@@ -146,3 +192,5 @@ https_async()
 // void loop()
 // {
 // }
+
+#endif

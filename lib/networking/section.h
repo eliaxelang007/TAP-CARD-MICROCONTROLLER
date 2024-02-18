@@ -5,31 +5,32 @@
 #include <variant>
 
 #include "result.h"
+#include "enum.h"
 
 // https://stackoverflow.com/questions/21295935/can-a-c-enum-class-have-methods
 // https://stackoverflow.com/questions/68315363/class-cant-have-constants-of-own-type-inside
-class Section
+
+namespace _
 {
-private:
-    enum class Value
+    enum class Section
     {
         A,
         B,
         C
-    } _section;
+    };
+}
 
-    constexpr explicit Section(Value section) noexcept : _section{section} {}
+class Section : public Enum<_::Section>
+{
+private:
+    using Value = _::Section;
+
+    constexpr explicit Section(Value section) noexcept : Enum<Value>{section} {}
 
 public:
     static const Section A;
     static const Section B;
     static const Section C;
-
-    constexpr operator Value() const { return _section; }
-    explicit operator bool() const = delete;
-
-    constexpr bool operator==(const Section &other) const { return _section == other._section; }
-    constexpr bool operator!=(const Section &other) const { return _section != other._section; }
 
     using OptionSection = Option<Section>;
 
