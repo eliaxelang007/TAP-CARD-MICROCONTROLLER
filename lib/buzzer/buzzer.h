@@ -1,6 +1,8 @@
 #ifndef _BUZZER
 #define _BUZZER
 
+#include <Arduino.h>
+
 #include <array>
 #include <inttypes.h>
 
@@ -94,17 +96,17 @@ class Buzzer
 public:
     explicit Buzzer(uint8_t pin) : _pin{pin} {}
 
-    void reset() volatile
+    void reset() noexcept
     {
         _previous_song = nullptr;
     }
 
     template <size_t note_count>
-    void play(std::array<Note, note_count> &song) volatile
+    void play(const std::array<Note, note_count> &song) noexcept
     {
         const uint32_t current_time = millis();
 
-        const bool was_playing = _previous_song == song;
+        const bool was_playing = _previous_song == &song;
         const bool switched_song = !was_playing;
 
         if (switched_song)
@@ -151,7 +153,7 @@ private:
     uint8_t _pin;
     size_t _note_index = 0;
     uint32_t _previous_time = 0;
-    Note *_previous_song = nullptr;
+    const Note *_previous_song = nullptr;
 };
 
 #endif

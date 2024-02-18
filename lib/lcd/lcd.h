@@ -11,23 +11,23 @@ template <size_t rows, size_t columns>
 class Display : public Print
 {
 public:
-    Display(uint8_t i2c_address = 0x27) : _lcd{i2c_address, columns, rows},
-                                          _current_buffer{},
-                                          _previous_buffer{},
-                                          _row{0},
-                                          _column{0}
+    Display(uint8_t i2c_address = 0x27) noexcept : _lcd{i2c_address, columns, rows},
+                                                   _current_buffer{},
+                                                   _previous_buffer{},
+                                                   _row{0},
+                                                   _column{0}
     {
         _clear(_current_buffer);
         _clear(_previous_buffer);
     }
 
-    void initialize()
+    void initialize() noexcept
     {
         _lcd.init();
         _lcd.backlight();
     }
 
-    size_t write(uint8_t character) override
+    size_t write(uint8_t character) noexcept override
     {
         if (_column >= columns || _row >= rows)
             return 0;
@@ -37,7 +37,7 @@ public:
         return 1;
     }
 
-    void clear()
+    void clear() noexcept
     {
         set_cursor(0, 0);
         _lcd.setCursor(0, 0);
@@ -45,13 +45,13 @@ public:
         _clear(_current_buffer);
     }
 
-    void set_cursor(uint8_t new_column, uint8_t new_row)
+    void set_cursor(uint8_t new_column, uint8_t new_row) noexcept
     {
         _row = new_row;
         _column = new_column;
     }
 
-    void show()
+    void show() noexcept
     {
         for (int i = 0; i < rows; i++)
         {
@@ -94,7 +94,7 @@ private:
 
     LiquidCrystal_I2C _lcd;
 
-    void _clear(std::array<std::array<char, columns>, rows> &buffer)
+    void _clear(std::array<std::array<char, columns>, rows> &buffer) noexcept
     {
         // https://www.reddit.com/r/cpp_questions/comments/p3ntua/how_to_properly_use_stdarrayfill_method_to/
         // https://godbolt.org/z/eTYhsv85h

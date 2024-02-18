@@ -3,7 +3,9 @@
 
 #define DEBUG_MODE
 
-void begin()
+#include <Arduino.h>
+
+void begin() noexcept
 {
     static bool began = false;
 
@@ -18,21 +20,21 @@ void begin()
 }
 
 template <typename P>
-void print(P printable)
+void print(P printable) noexcept
 {
     begin();
     Serial.print(printable);
 }
 
 template <typename P>
-void println(P printable)
+void println(P printable) noexcept
 {
     begin();
     Serial.println(printable);
 }
 
 template <typename P>
-void debug(P printable)
+void debug(P printable) noexcept
 {
 #ifdef DEBUG_MODE
     print(printable);
@@ -40,16 +42,18 @@ void debug(P printable)
 }
 
 template <typename P>
-void debugln(P printable)
+void debugln(P printable) noexcept
 {
 #ifdef DEBUG_MODE
     println(printable);
 #endif
 }
 
-String readln(String message)
+template <typename P>
+String readln(P printable) noexcept
 {
-    println(message);
+    print(printable);
+    println(" ");
 
     while (!Serial.available())
     {

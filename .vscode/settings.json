@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "Constless",
         "debugln",
         "ECRUTEAK",
         "MFRC",
@@ -9,9 +10,14 @@
         "Rfid"
     ],
     "files.associations": {
-        "array": "cpp",
-        "atomic": "cpp",
         "*.tcc": "cpp",
+        "algorithm": "cpp",
+        "variant": "cpp",
+        "array": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "type_traits": "cpp",
+        "atomic": "cpp",
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
@@ -21,15 +27,17 @@
         "cstdio": "cpp",
         "cstdlib": "cpp",
         "cstring": "cpp",
+        "ctime": "cpp",
         "cwchar": "cpp",
         "cwctype": "cpp",
         "deque": "cpp",
         "unordered_map": "cpp",
+        "unordered_set": "cpp",
         "vector": "cpp",
         "exception": "cpp",
-        "algorithm": "cpp",
         "functional": "cpp",
         "iterator": "cpp",
+        "map": "cpp",
         "memory": "cpp",
         "memory_resource": "cpp",
         "numeric": "cpp",
@@ -38,11 +46,9 @@
         "string": "cpp",
         "string_view": "cpp",
         "system_error": "cpp",
-        "tuple": "cpp",
-        "type_traits": "cpp",
-        "utility": "cpp",
         "fstream": "cpp",
         "initializer_list": "cpp",
+        "iomanip": "cpp",
         "iosfwd": "cpp",
         "istream": "cpp",
         "limits": "cpp",
@@ -52,7 +58,7 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
-    },
-    "C_Cpp.errorSquiggles": "enabled"
+        "typeinfo": "cpp",
+        "iostream": "cpp"
+    }
 }
