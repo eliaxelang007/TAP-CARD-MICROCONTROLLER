@@ -8,7 +8,7 @@
 
 constexpr uint8_t SECOND_MILLISECONDS = 1000;
 
-ServerApi api{"https://tap-card-server-production.up.railway.app"};
+ServerApi api{"https://tap-card-server.onrender.com/"};
 
 Display<2, 16> display{0x27};
 RfidScanner scanner{5, 0};
